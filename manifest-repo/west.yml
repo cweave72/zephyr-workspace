@@ -1,0 +1,25 @@
+manifest:
+  remotes:
+    - name: zephyrproject-rtos
+      url-base: https://github.com/zephyrproject-rtos
+    - name: cweave72
+      url-base: https://github.com/cweave72
+  projects:
+    - name: zephyr-applications
+      remote: cweave72
+      revision: main
+      path: applications
+    - name: zephyr
+      remote: zephyrproject-rtos
+      revision: v3.7.0
+      import:
+        path-prefix: deps
+        name-allowlist:
+          - cmsis
+          - hal_espressif
+          - hal_stm32
+          - mcuboot
+          - net-tools
+          - littlefs
+  self:
+    path: manifest-repo
