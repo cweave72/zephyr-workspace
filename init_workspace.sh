@@ -9,6 +9,8 @@ usage: $0 [OPTIONS]
 
     Options:
     -h, --help           Show this message
+    --help               Run init steps.
+    -m, --main           Switch applications/ to main branch.
     -r, --reset          Reset the workspace, then init.
 EOF
 }
@@ -50,15 +52,23 @@ function reset {
     rm cscope.* tags *.log
 }
 
+do_init=0
 do_reset=0
 reset_wks=0
+do_main=0
 
 # Handle script arguments and options.
 leftoverargs=()
 for arg in "$@"; do
     case $arg in
+        --init)
+            do_init=1
+            ;;
         -r|--reset)
             reset_wks=1
+            ;;
+        -m|--main)
+            do_main=1
             ;;
         -h|--help)
             help
@@ -81,4 +91,11 @@ if [[ $do_reset == 1 ]]; then
     reset
 fi
 
-init_venv && west_steps
+if [[ $do_init == 1 ]]; then
+    init_venv && west_steps
+fi
+
+if [[ $do_main == 1 ]]; then
+    git -C applications fetch
+    git -C applications checkout main
+fi
