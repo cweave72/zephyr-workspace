@@ -31,20 +31,68 @@ On a clean checkout, do the following:
 
 1. `./init_workspace.sh`
 
-## Commit Changes To An Application
+## Workspace Structure
 
-This is a bit tricky since west manages external projects by creating a
-`manifest-rev` branch for any imported project.
+```
+├── applications
+│   └── ...
+├── deps
+│   ├── ...
+│   └── zephyr
+│       └── west.yml
+├── manifest-repo
+│   └── west.yml
+├── init_venv.sh
+├── init_workspace.sh
+├── requirements.txt
+```
 
-Recommended: switch the application branch over to `main` (typically) prior to
-making any changes.  Then, modify, commit and push as normal.  Just remember
-that anytime you run `west update`, the branch will be reset to the
-`manifest-rev` branch and you will need to again switch to `main`.
+Workspace manifest:
+
+`manifest-repo/west.yml`
+```yaml
+manifest:
+  remotes:
+    - name: zephyrproject-rtos
+      url-base: https://github.com/zephyrproject-rtos
+    - name: cweave72
+      url-base: https://github.com/cweave72
+  projects:
+    - name: zephyr-applications
+      remote: cweave72
+      revision: main
+      path: applications
+    - name: zephyr
+      remote: zephyrproject-rtos
+      revision: v3.7.0
+      import:
+        path-prefix: deps
+        name-allowlist:
+          - cmsis
+          - hal_espressif
+          - hal_stm32
+          - mcuboot
+          - net-tools
+          - littlefs
+  self:
+    path: manifest-repo
+```
+
+## Developing applications within the workspace
+
+This workspace is the place where development is intending to take place.
+However, this is a bit tricky since `west` manages external projects by creating
+a `manifest-rev` branch for any imported project.
+
+To work around this, switch the `applications` branch over to `main` (typically)
+prior to making any changes.  Then, modify, commit and push as normal.  Just
+remember that anytime you run `west update`, the branch will be reset to the
+`manifest-rev` branch and you will need to switch back to the `main` branch.
 
 ### If changes have already been made in the `manifest-rev` branch:
 
-Procedure for syncing local changes within the `manifest-rev` to another branch
-(i.e. `main`).
+Sometimes, you forget.  The following is a procedure for syncing local changes
+within the `manifest-rev` to another branch (i.e. `main`).
 
 Within the local app directory:
 ```bash

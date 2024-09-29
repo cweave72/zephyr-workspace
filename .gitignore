@@ -3,3 +3,6 @@
 applications/
 deps/
 *.log
+tags
+cscope.files
+cscope.out
