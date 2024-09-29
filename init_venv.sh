@@ -20,9 +20,6 @@ VENV_DIR=.venv
 activate_env $VENV_DIR
 if [ $? -eq 0 ]; then
     echo "Successfully activated venv."
-    #echo "Sourcing zephyr-env.sh"
-    #source deps/zephyr/zephyr-env.sh
-    #echo $ZEPHYR_BASE
     return 0
 fi
 
