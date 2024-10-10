@@ -1,6 +1,7 @@
 .venv/
 .west/
 applications/
+common-modules/
 deps/
 *.log
 tags

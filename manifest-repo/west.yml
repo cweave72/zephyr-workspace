@@ -9,6 +9,10 @@ manifest:
       remote: cweave72
       revision: main
       path: applications
+    - name: zephyr-common
+      remote: cweave72
+      revision: main
+      path: common-modules
     - name: zephyr
       remote: zephyrproject-rtos
       revision: v3.7.0
@@ -18,6 +22,7 @@ manifest:
           - cmsis
           - hal_espressif
           - hal_stm32
+          - mbedtls
           - mcuboot
           - net-tools
           - littlefs

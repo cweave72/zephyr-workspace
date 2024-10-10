@@ -44,6 +44,8 @@ function west_steps {
     west zephyr-export
     echo "Installing zephyr python req's."
     pip install -r deps/zephyr/scripts/requirements.txt
+    echo "Fetching esp32 blobs."
+    west blobs fetch hal_espressif
 }
 
 function reset {
@@ -97,5 +99,7 @@ fi
 
 if [[ $do_main == 1 ]]; then
     git -C applications fetch
+    git -C common-modules fetch
     git -C applications checkout main
+    git -C common-modules checkout main
 fi
