@@ -9,9 +9,9 @@ usage: $0 [OPTIONS]
 
     Options:
     -h, --help           Show this message
-    --help               Run init steps.
+    --init               Run init steps.
     -m, --main           Switch applications/ to main branch.
-    -r, --reset          Reset the workspace, then init.
+    -r, --reset          Reset the workspace.
 EOF
 }
 
