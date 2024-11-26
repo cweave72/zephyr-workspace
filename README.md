@@ -118,3 +118,50 @@ HEAD is now at 3a19916 Added README.md.
 WARNING: left behind zephyr-applications branch "main"; to switch back to it (fast forward):
   git -C applications checkout main
 ```
+
+## Upgrading Zephyr version
+
+Instructions for moving to a newer version of Zephyr code base:
+
+1. Update the zephyr `revision` in the workspace manifest:
+
+`manifest-repo/west.yml`
+```yaml
+manifest:
+  remotes:
+    - name: zephyrproject-rtos
+      url-base: https://github.com/zephyrproject-rtos
+    - name: cweave72
+      url-base: https://github.com/cweave72
+  projects:
+    - name: zephyr-applications
+      remote: cweave72
+      revision: main
+      path: applications
+    - name: zephyr
+      remote: zephyrproject-rtos
+      revision: v4.0.0                    # --> Was v3.7.0
+      import:
+        path-prefix: deps
+        name-allowlist:
+          - cmsis
+          - hal_espressif
+          - hal_stm32
+          - mcuboot
+          - net-tools
+          - littlefs
+  self:
+    path: manifest-repo
+```
+
+2. Run `west update` at the top of the workspace.
+
+```
+. init_venv.sh
+west update
+```
+
+3. (esp32 only) Re-fetch the esp32 blobs again.
+```
+west blobs fetch hal_espressif
+```

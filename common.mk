@@ -5,7 +5,7 @@ SHELL := /bin/bash
 BASEDIR ?= $(THIS_DIR)
 
 # List of targets which cause parameter checks.
-skip_check_targets := west help boards clean flash mon appboards 
+skip_check_targets := west help boards clean flash mon appboards menuconfig
 
 ifneq ($(MAKECMDGOALS),)
     ifeq ($(filter $(MAKECMDGOALS), $(skip_check_targets)), )
@@ -47,6 +47,7 @@ help:
 	@echo "  mon        : Runs monitor (esp32 support only)"
 	@echo "  boards     : List supported boards for zephyr."
 	@echo "  appboards  : List supported boards for application."
+	@echo "  menuconfig : Runs menuconfig utility."
 	@echo "  clean      : Cleans build directory."
 	@echo ""
 	@echo "Examples: Building, flashing, monitoring"
@@ -65,6 +66,11 @@ all:
 
 .PHONY: west
 west: 
+	@$(invoke_west)
+
+.PHONY: menuconfig
+menuconfig:
+	@$(eval WEST_CMD=build -t menuconfig)
 	@$(invoke_west)
 
 

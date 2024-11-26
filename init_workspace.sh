@@ -74,7 +74,7 @@ for arg in "$@"; do
             ;;
         -h|--help)
             help
-            return 0
+            exit 0
             ;;
         *)
             leftoverargs+=("$arg")

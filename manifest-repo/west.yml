@@ -15,7 +15,7 @@ manifest:
       path: common-modules
     - name: zephyr
       remote: zephyrproject-rtos
-      revision: v3.7.0
+      revision: v4.0.0
       import:
         path-prefix: deps
         name-allowlist:
