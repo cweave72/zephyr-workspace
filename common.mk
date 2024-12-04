@@ -2,19 +2,28 @@ THIS_DIR := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
 
 SHELL := /bin/bash
 
-BASEDIR ?= $(THIS_DIR)
+export BASEDIR ?= $(THIS_DIR)
 
 # List of targets which cause parameter checks.
-skip_check_targets := west help boards clean flash mon appboards menuconfig
+#skip_check_targets := west help boards clean flash mon appboards menuconfig
 
-ifneq ($(MAKECMDGOALS),)
-    ifeq ($(filter $(MAKECMDGOALS), $(skip_check_targets)), )
-        ifeq ($(BOARD),)
-            $(error "BOARD parameter must be provided")
-        endif
+#ifneq ($(MAKECMDGOALS),)
+#    ifeq ($(filter $(MAKECMDGOALS), $(skip_check_targets)), )
+#        ifeq ($(BOARD),)
+#            $(error "BOARD parameter must be provided")
+#        endif
+#    endif
+#endif
+    
+# Default west build command.
+WEST_BUILD_CMD := build -b $(BOARD)
+ifeq ($(MAKECMDGOALS), build)
+    ifeq ($(BOARD),)
+	# If board not specified don't add -b option.
+        WEST_BUILD_CMD := build
     endif
 endif
-    
+
 EXT_CMD ?= espressif
 WEST_CMD :=
 WEST_OPTS :=
@@ -23,10 +32,14 @@ ifdef PRISTINE
     WEST_OPTS += -p
 endif
 
-BOARDS := $(notdir $(wildcard boards/*.overlay))
-BOARD_ROOT := $(abspath $(BASEDIR)/common-modules)
-
 export ZEPHYR_BASE = $(abspath $(BASEDIR)/deps/zephyr)
+export NANOPB_BASE = $(abspath $(BASEDIR)/deps/optional/nanopb)
+export COMMON_BASE = $(abspath $(BASEDIR)/common)
+export COMMON_PROTO_BASE = $(COMMON_BASE)/proto
+export COMMON_MAKE_SCRIPTS = $(COMMON_BASE)/scripts/make
+
+BOARDS := $(notdir $(wildcard boards/*.overlay))
+BOARD_ROOT := $(abspath $(BASEDIR)/common)
 
 # Macro to invoke west within the virtual environment.
 define invoke_west
@@ -34,7 +47,16 @@ define invoke_west
    source $(BASEDIR)/utils.sh; \
    init_ws init_venv.sh; \
    echo "Running west $(ARGS)"; \
-   west $(WEST_CMD) $(WEST_SUBCOMMAND) $(ARGS) $(WEST_OPTS); \
+   west $(WEST_CMD) $(ARGS) $(WEST_OPTS); \
+   )
+endef
+
+# Macro to invoke the virtual environment.
+define invoke_venv
+   @(\
+   source $(BASEDIR)/utils.sh; \
+   init_ws init_venv.sh; \
+   $(VENV_CMD); \
    )
 endef
 
@@ -48,6 +70,7 @@ help:
 	@echo "  boards     : List supported boards for zephyr."
 	@echo "  appboards  : List supported boards for application."
 	@echo "  menuconfig : Runs menuconfig utility."
+	@echo "  commonprotos : Builds python bindings for common proto files."
 	@echo "  clean      : Cleans build directory."
 	@echo ""
 	@echo "Examples: Building, flashing, monitoring"
@@ -76,7 +99,7 @@ menuconfig:
 
 .PHONY: build
 build: 
-	@$(eval WEST_CMD=build -b $(BOARD))
+	@$(eval WEST_CMD=$(WEST_BUILD_CMD))
 	@$(invoke_west)
 
 .PHONY: flash flashmon mon
@@ -99,6 +122,12 @@ appboards:
 boards:
 	@$(eval WEST_CMD=boards)
 	@$(invoke_west)
+
+.PHONY: commonprotos
+commonprotos:
+	@echo "In commonprotos"
+	@${MAKE} --no-print-directory -C $(COMMON_PROTO_BASE) DST=$(CURDIR)/python/proto proto
+
 
 .PHONY: clean
 clean:

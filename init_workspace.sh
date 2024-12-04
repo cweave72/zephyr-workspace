@@ -10,6 +10,7 @@ usage: $0 [OPTIONS]
     Options:
     -h, --help           Show this message
     --init               Run init steps.
+    --venv               Update the python virtualenv.
     -m, --main           Switch applications/ to main branch.
     -r, --reset          Reset the workspace.
 EOF
@@ -35,6 +36,12 @@ function init_venv {
     fi
 }
 
+function install_zephyr_python_deps {
+    # VirtualEnv should be activated prior to calling.
+    echo "Installing zephyr python req's."
+    pip install -r deps/zephyr/scripts/requirements.txt
+}
+
 function west_steps {
     echo "Running west init"
     west init --local manifest-repo
@@ -42,8 +49,6 @@ function west_steps {
     west update
     echo "Running west zephyr-export"
     west zephyr-export
-    echo "Installing zephyr python req's."
-    pip install -r deps/zephyr/scripts/requirements.txt
     echo "Fetching esp32 blobs."
     west blobs fetch hal_espressif
 }
@@ -58,6 +63,7 @@ do_init=0
 do_reset=0
 reset_wks=0
 do_main=0
+do_update_venv=0
 
 # Handle script arguments and options.
 leftoverargs=()
@@ -65,6 +71,9 @@ for arg in "$@"; do
     case $arg in
         --init)
             do_init=1
+            ;;
+        --venv)
+            do_update_venv=1
             ;;
         -r|--reset)
             reset_wks=1
@@ -94,12 +103,18 @@ if [[ $do_reset == 1 ]]; then
 fi
 
 if [[ $do_init == 1 ]]; then
-    init_venv && west_steps
+    init_venv && install_zephyr_python_deps && west_steps
+fi
+
+if [[ $do_update_venv == 1 ]]; then
+    echo "Updating python virtual env."
+    rm -rf .venv/
+    init_venv && install_zephyr_python_deps
 fi
 
 if [[ $do_main == 1 ]]; then
     git -C applications fetch
-    git -C common-modules fetch
+    git -C common fetch
     git -C applications checkout main
-    git -C common-modules checkout main
+    git -C common checkout main
 fi

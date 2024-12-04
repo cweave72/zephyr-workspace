@@ -4,6 +4,8 @@ manifest:
       url-base: https://github.com/zephyrproject-rtos
     - name: cweave72
       url-base: https://github.com/cweave72
+    - name: nanopb
+      url-base: https://github.com/nanopb
   projects:
     - name: zephyr-applications
       remote: cweave72
@@ -12,7 +14,11 @@ manifest:
     - name: zephyr-common
       remote: cweave72
       revision: main
-      path: common-modules
+      path: common
+    - name: nanopb
+      remote: nanopb
+      revision: nanopb-0.4.9
+      path: deps/optional/nanopb
     - name: zephyr
       remote: zephyrproject-rtos
       revision: v4.0.0
