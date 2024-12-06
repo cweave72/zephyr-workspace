@@ -123,12 +123,6 @@ boards:
 	@$(eval WEST_CMD=boards)
 	@$(invoke_west)
 
-.PHONY: commonprotos
-commonprotos:
-	@echo "In commonprotos"
-	@${MAKE} --no-print-directory -C $(COMMON_PROTO_BASE) DST=$(CURDIR)/python/proto proto
-
-
 .PHONY: clean
 clean:
 	@echo "Removing $(CURDIR)/build"

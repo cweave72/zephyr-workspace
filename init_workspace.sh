@@ -2,6 +2,17 @@
 # This script is run once from a clean workspace to pull Zephyr source.
 # Source init_venv.sh to activate the venv or recreate it.
 #
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+	echo "Error: script must be sourced."
+	exit
+fi
+
+export WORKSPACE_BASE=$(pwd)
+export TOOLS_BASE=$(pwd)/common/tools
+
+echo "Set WORKSPACE_BASE=$WORKSPACE_BASE"
+echo "Set TOOLS_BASE=$TOOLS_BASE"
+
 help() {
   cat << EOF
 usage: $0 [OPTIONS]
@@ -103,7 +114,10 @@ if [[ $do_reset == 1 ]]; then
 fi
 
 if [[ $do_init == 1 ]]; then
-    init_venv && install_zephyr_python_deps && west_steps
+    ask "Do you really want to init the workspace?"
+    if [[ $? == 1 ]]; then
+        init_venv && install_zephyr_python_deps && west_steps
+    fi
 fi
 
 if [[ $do_update_venv == 1 ]]; then
