@@ -1,17 +1,6 @@
 #!/bin/bash
 # This script is run once from a clean workspace to pull Zephyr source.
 # Source init_venv.sh to activate the venv or recreate it.
-#
-if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
-	echo "Error: script must be sourced."
-	exit
-fi
-
-export WORKSPACE_BASE=$(pwd)
-export TOOLS_BASE=$(pwd)/common/tools
-
-echo "Set WORKSPACE_BASE=$WORKSPACE_BASE"
-echo "Set TOOLS_BASE=$TOOLS_BASE"
 
 help() {
   cat << EOF

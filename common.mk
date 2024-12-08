@@ -32,7 +32,6 @@ ifdef PRISTINE
     WEST_OPTS += -p
 endif
 
-export ZEPHYR_BASE = $(abspath $(BASEDIR)/deps/zephyr)
 export NANOPB_BASE = $(abspath $(BASEDIR)/deps/optional/nanopb)
 export COMMON_BASE = $(abspath $(BASEDIR)/common)
 export COMMON_PROTO_BASE = $(COMMON_BASE)/proto
@@ -45,9 +44,11 @@ BOARD_ROOT := $(abspath $(BASEDIR)/common)
 define invoke_west
    @(\
    source $(BASEDIR)/utils.sh; \
+   source $(BASEDIR)/deps/zephyr/zephyr-env.sh; \
+   source $(BASEDIR)/workspace-env.sh; \
    init_ws init_venv.sh; \
    echo "Running west $(ARGS)"; \
-   west $(WEST_CMD) $(ARGS) $(WEST_OPTS); \
+   west $(WEST_CMD) $(WEST_OPTS) $(ARGS); \
    )
 endef
 
