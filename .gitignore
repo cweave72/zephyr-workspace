@@ -2,8 +2,9 @@
 .west/
 applications/
 common/
-deps/
+#deps/
 *.log
 tags
 cscope.files
 cscope.out
+*.egg-info

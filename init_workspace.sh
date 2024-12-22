@@ -36,12 +36,6 @@ function init_venv {
     fi
 }
 
-function install_zephyr_python_deps {
-    # VirtualEnv should be activated prior to calling.
-    echo "Installing zephyr python req's."
-    pip install -r deps/zephyr/scripts/requirements.txt
-}
-
 function west_steps {
     echo "Running west init"
     west init --local manifest-repo
@@ -105,14 +99,14 @@ fi
 if [[ $do_init == 1 ]]; then
     ask "Do you really want to init the workspace?"
     if [[ $? == 1 ]]; then
-        init_venv && install_zephyr_python_deps && west_steps
+        init_venv && west_steps
     fi
 fi
 
 if [[ $do_update_venv == 1 ]]; then
     echo "Updating python virtual env."
     rm -rf .venv/
-    init_venv && install_zephyr_python_deps
+    init_venv
 fi
 
 if [[ $do_main == 1 ]]; then

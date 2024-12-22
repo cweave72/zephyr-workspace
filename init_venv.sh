@@ -7,34 +7,28 @@ fi
 SCRIPTPATH=$(dirname $(realpath "${BASH_SOURCE[0]}"))
 
 function activate_env {
+    uv sync --all-groups
     source $1/bin/activate 2>/dev/null
     if [ ! $? -eq 0 ]; then
         return 1
     fi
 }
 
-PY3=python3.10
-PROMPT=venv
+PY3=">=3.10"
 VENV_DIR=.venv
 
+# Activate the virtual env.
 activate_env $VENV_DIR
 if [ $? -eq 0 ]; then
     echo "Successfully activated venv."
     return 0
 fi
 
-echo "Creating virtual environment in $VENV_DIR."
-$PY3 -m venv --prompt=$PROMPT $VENV_DIR
+# Create the virtual env.
+uv venv --python $PY3
 if [ ! $? -eq 0 ]; then
     echo "Error creating virtual env."
     return 1
 fi
 
 activate_env $VENV_DIR
-pip install -r requirements.txt --log pip.log
-
-if [ -f zephyr/scripts/requirements.txt ]; then
-    echo "Installing zephyr requirements."
-    pip install -r zephyr/scripts/requirements.txt
-fi
-

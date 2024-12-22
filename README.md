@@ -29,7 +29,7 @@ sudo udevadm control --reload
 
 On a clean checkout, do the following:
 
-1. `./init_workspace.sh`
+1. `./init_workspace.sh --init`
 
 ## Workspace Structure
 
@@ -165,3 +165,27 @@ west update
 ```
 west blobs fetch hal_espressif
 ```
+
+## Managing the Python Environment
+
+The python virtual environment is managed by the `uv` tool.  All dependencies
+for development and the Zephyr build environment are incorportated into the
+`pyproject.toml` file.
+
+Initially, zephyr python dependencies were added to the pyproject.toml file
+by the following command:
+```bash
+uv add --group zephyr -r deps/zephyr/scripts/requirements.txt
+```
+
+The environment may be refreshed by:
+```bash
+uv venv
+uv sync --all-groups
+```
+
+Python dependencies can be added by:
+`uv add <dep>`
+
+Local Python dependencies (editable) are added by:
+`uv add -e /path/to/local/package`
