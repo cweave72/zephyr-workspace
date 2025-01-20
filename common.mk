@@ -112,6 +112,11 @@ mon:
 	@$(eval WEST_CMD=$(EXT_CMD) monitor)
 	@$(invoke_west)
 
+test:
+	@$(eval WEST_CMD = twister --no-clean --platform $(BOARD) -T .)
+	@$(invoke_west)
+
+
 
 .PHONY: appboards
 appboards:
