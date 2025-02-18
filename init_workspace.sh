@@ -112,6 +112,10 @@ fi
 if [[ $do_main == 1 ]]; then
     git -C applications fetch
     git -C common fetch
+    git -C proto fetch
+    git -C python fetch
     git -C applications checkout main
     git -C common checkout main
+    git -C proto checkout main
+    git -C python checkout main
 fi

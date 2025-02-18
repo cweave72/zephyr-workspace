@@ -5,22 +5,18 @@ requires-python = ">=3.10"
 # Environment development dependencies:
 # Add more using: uv add <dep>
 dependencies = [
-    "api-generator",
-    "protorpc",
     "west>=0.14.0",
     "protobuf>=3.20.3",
     "grpcio-tools>=1.47.0",
     "betterproto[compiler]==2.0.0b6",
+    "zephyr-python",
 ]
-
-# Editable packages.
-# Add with: uv add -e path/to/package
-[tool.uv.sources]
-api-generator = { path = "common/tools/api_generator", editable = true }
-protorpc = { path = "common/tools/protorpc", editable = true }
 
 [tool.uv]
 package = false
+
+[tool.uv.sources]
+zephyr-python = { path = "python" }
 
 # Zephyr dependencies added using:
 # uv add --group zephyr -r deps/zephyr/scripts/requirements.txt

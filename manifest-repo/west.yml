@@ -15,6 +15,14 @@ manifest:
       remote: cweave72
       revision: main
       path: common
+    - name: zephyr-proto
+      remote: cweave72
+      revision: main
+      path: proto
+    - name: zephyr-python
+      remote: cweave72
+      revision: main
+      path: python
     - name: nanopb
       remote: nanopb
       revision: nanopb-0.4.9

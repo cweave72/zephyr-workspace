@@ -34,7 +34,7 @@ endif
 
 export NANOPB_BASE = $(abspath $(BASEDIR)/deps/optional/nanopb)
 export COMMON_BASE = $(abspath $(BASEDIR)/common)
-export COMMON_PROTO_BASE = $(COMMON_BASE)/proto
+export COMMON_PROTO_BASE = $(BASEDIR)/proto
 export COMMON_MAKE_SCRIPTS = $(COMMON_BASE)/scripts/make
 
 BOARDS := $(notdir $(wildcard boards/*.overlay))
