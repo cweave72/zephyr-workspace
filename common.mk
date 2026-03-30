@@ -48,7 +48,7 @@ define invoke_west
    source $(BASEDIR)/workspace-env.sh; \
    init_ws init_venv.sh; \
    echo "Running west $(ARGS)"; \
-   west $(WEST_CMD) $(WEST_OPTS) $(ARGS); \
+   west $(WEST_CMD) $(WEST_OPTS) $(ARGS) -- $(CMAKE_OPTS); \
    )
 endef
 
@@ -67,6 +67,7 @@ help:
 	@echo "  build      : Runs a west build."
 	@echo "  west       : Runs a west command."
 	@echo "  flash      : Flashes a board."
+	@echo "  run        : Runs when BOARD=qemu_*."
 	@echo "  mon        : Runs monitor (esp32 support only)"
 	@echo "  boards     : List supported boards for zephyr."
 	@echo "  appboards  : List supported boards for application."
@@ -76,6 +77,7 @@ help:
 	@echo ""
 	@echo "Examples: Building, flashing, monitoring"
 	@echo "  make BOARD=esp32s3_matrix [PRISTINE=y] build"
+	@echo "  make BOARD=esp32s3_matrix [PRISTINE=y] build CMAKE_OPTS=\"-DCONFIG_SOMETHING=y\""
 	@echo "  make flash"
 	@echo "  make mon"
 	@echo "  make flash mon"
@@ -101,6 +103,11 @@ menuconfig:
 .PHONY: build
 build: 
 	@$(eval WEST_CMD=$(WEST_BUILD_CMD))
+	@$(invoke_west)
+
+.PHONY: run
+run: 
+	@$(eval WEST_CMD=build -t run)
 	@$(invoke_west)
 
 .PHONY: flash flashmon mon
