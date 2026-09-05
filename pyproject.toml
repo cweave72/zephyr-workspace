@@ -10,6 +10,7 @@ dependencies = [
     "grpcio-tools>=1.47.0",
     "betterproto[compiler]==2.0.0b6",
     "zephyr-python",
+    "copier>=9.18.1",
 ]
 
 [tool.uv]
