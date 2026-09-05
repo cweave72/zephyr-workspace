@@ -35,6 +35,7 @@ manifest:
         name-allowlist:
           - cmsis
           - hal_espressif
+          - hal_rpi_pico
           - hal_stm32
           - mbedtls
           - mcuboot
