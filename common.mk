@@ -117,6 +117,8 @@ help:
 	@echo "  attach     : Attaches gdb to a running target (no reflash)."
 	@echo "  debugserver: Starts a gdb server on port 3333."
 	@echo "  reset      : Restarts the image on the target (no reflash)."
+	@echo "  brand      : Writes BRAND (default brand/default) into the flash file system."
+	@echo "  brandimage : Builds the brand image only (build/brand/)."
 	@echo "  run        : Runs when BOARD=qemu_*."
 	@echo "  mon        : Runs serial monitor (west monitor for esp32; miniterm if PORT set)"
 	@echo "  boards     : List supported boards for zephyr."
@@ -184,6 +186,41 @@ run:
 .PHONY: flash debug attach debugserver
 flash debug attach debugserver:
 	@$(eval WEST_CMD=$@ $(RUNNER_OPTS))
+	@$(invoke_west)
+
+# Branding: put build-time files into a flash file system (FsApi), for example
+# brand/default/etc/config/net.conf -> /flash/etc/config/net.conf.
+#   make brand                  build the image from BRAND and flash it
+#   make brandimage             build the image only (build/brand/)
+#   make brand BRAND=~/secret   any directory, so secrets can stay outside git
+# The image replaces the whole partition: the runtime files of the mount are
+# lost. 'make flash' never touches the partition. BRAND_MOUNT selects the mount
+# when the build has more than one flash mount. fsapi-brand reads the geometry
+# from build/fsapi_layout.json, which the FsApi build writes.
+#
+# BRAND_FLASH_ARGS gives the west flash arguments which write only the image. The
+# default suits a runner which flashes a hex file (openocd). A board with another
+# runner sets it in its board.mk, for example for esp32 (esptool):
+#   BRAND_FLASH_ARGS = --bin-file build/brand/brand.bin \
+#                      --esp-app-address $$(cat build/brand/partition_offset)
+BRAND ?= brand/default
+BRAND_MOUNT ?=
+BRAND_OUT := build/brand
+BRAND_FLASH_ARGS ?= --hex-file $(BRAND_OUT)/brand.hex
+# The tool is in the tools venv (python/.venv), not in the build venv.
+FSAPI_BRAND := $(BASEDIR)/python/.venv/bin/fsapi-brand
+
+.PHONY: brand brandimage
+brandimage:
+	@if [ ! -x $(FSAPI_BRAND) ]; then \
+	    echo "$(FSAPI_BRAND) not found. Install the tools venv: cd python && uv sync"; \
+	    exit 1; \
+	fi
+	@$(FSAPI_BRAND) --build build --src $(BRAND) --out $(BRAND_OUT) \
+	    $(if $(BRAND_MOUNT),--mount $(BRAND_MOUNT))
+
+brand: brandimage
+	@$(eval WEST_CMD=flash $(RUNNER_OPTS) $(BRAND_FLASH_ARGS))
 	@$(invoke_west)
 
 # Restart the image already on the target, without reflashing it. Unlike the
