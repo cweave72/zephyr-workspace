@@ -189,7 +189,9 @@ flash debug attach debugserver:
 	@$(invoke_west)
 
 # Branding: put build-time files into a flash file system (FsApi), for example
-# brand/default/etc/config/net.conf -> /flash/etc/config/net.conf.
+# brand/default/etc/bootmsg.txt -> /flash/etc/bootmsg.txt. A <name>.pb.yaml file
+# becomes the protobuf blob <name>.pb (see python/fsapi/README.md). The proto
+# search path is the workspace proto/ directory and the app proto/ directory.
 #   make brand                  build the image from BRAND and flash it
 #   make brandimage             build the image only (build/brand/)
 #   make brand BRAND=~/secret   any directory, so secrets can stay outside git
@@ -217,7 +219,9 @@ brandimage:
 	    exit 1; \
 	fi
 	@$(FSAPI_BRAND) --build build --src $(BRAND) --out $(BRAND_OUT) \
-	    $(if $(BRAND_MOUNT),--mount $(BRAND_MOUNT))
+	    $(if $(BRAND_MOUNT),--mount $(BRAND_MOUNT)) \
+	    --proto-path $(COMMON_PROTO_BASE) \
+	    $(if $(wildcard proto),--proto-path proto)
 
 brand: brandimage
 	@$(eval WEST_CMD=flash $(RUNNER_OPTS) $(BRAND_FLASH_ARGS))
