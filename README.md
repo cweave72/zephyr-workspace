@@ -31,15 +31,27 @@ On a clean checkout, do the following:
 
 1. `./init_workspace.sh --init`
 
-This creates the build virtual environment, then runs `west init`,
-`west update`, `west zephyr-export`, and fetches the esp32 blobs.
+This runs the following steps in order:
+
+1. Create the build virtual environment and install `west` in it. The full
+   environment cannot install yet, because it depends on the `python`
+   repository, which `west update` clones.
+2. `west init`, `west update`, and `west zephyr-export`.
+3. Install the full build environment (`uv sync --all-groups`). This sources
+   `workspace-env.sh` first, because the `python` packages build their protobuf
+   bindings from `PROTO_BASE`.
+4. Fetch the esp32 blobs. This step needs the full environment.
+
+After `--init`, the repositories are on their `manifest-rev` branches. Run
+`./init_workspace.sh --main` before you make changes. Refer to
+[Developing applications within the workspace](#developing-applications-within-the-workspace).
 
 `init_workspace.sh` supplies these options:
 
 | Option          | Task                                                                                                                         |
 |-----------------|------------------------------------------------------------------------------------------------------------------------------|
 | `--init`        | Initialize a clean checkout.                                                                                                 |
-| `--venv`        | Delete the build virtual environment and create it again.                                                                    |
+| `--venv`        | Delete the build virtual environment and create it again. Run it after `--init` only; it needs the `python` repository.      |
 | `-m`, `--main`  | Switch the workspace repositories to the `main` branch.                                                                      |
 | `-r`, `--reset` | Delete the build virtual environment, the west metadata, and the generated files. Does not delete `deps/` or any repository. |
 | `--reset-deps`  | Delete `deps/`. west clones the external code again.                                                                         |
@@ -274,8 +286,9 @@ west blobs fetch hal_espressif
 ## Managing the Python Environment
 
 The python virtual environment is managed by the `uv` tool.  All dependencies
-for development and the Zephyr build environment are incorportated into the
-`pyproject.toml` file.
+for development, the Zephyr build environment, and the host tools (the
+`zephyr-python` path dependency) are incorporated into the `pyproject.toml`
+file.
 
 Initially, zephyr python dependencies were added to the pyproject.toml file
 by the following command:
@@ -285,9 +298,12 @@ uv add --group zephyr -r deps/zephyr/scripts/requirements.txt
 
 The environment may be refreshed by:
 ```bash
+source workspace-env.sh     # PROTO_BASE is needed to build the host tools
 uv venv
 uv sync --all-groups
 ```
+
+Alternatively, run `./init_workspace.sh --venv`, which does this for you.
 
 Python dependencies can be added by:
 `uv add <dep>`
@@ -302,44 +318,43 @@ the host tools for the workspace. The tools send RPC commands to a device,
 generate code from `.proto` files, generate new applications, and read device
 trace data.
 
-### The tools use their own virtual environment
+### Virtual environments
 
-The workspace has two virtual environments. Each one has a different task. Do
-not use one environment for the task of the other.
+The workspace `.venv` contains `west`, the Zephyr dependencies, and the host
+tools (`app_gen`, `fsapi-cli`, `trace-tool`, and others). It is the only
+environment that you need in the workspace. The build activates it, and
+`init_venv.sh` at the workspace root activates it for you.
 
-| Environment    | Task                                                              |
-|----------------|-------------------------------------------------------------------|
-| `.venv`        | Builds the firmware. Contains `west` and the Zephyr dependencies. |
-| `python/.venv` | Runs the host tools.                                              |
+`python/.venv` is for standalone use of the `python` repository, which operates
+without this workspace. Refer to `python/README.md`.
 
 ### Setup
 
-Source the workspace environment first. This sets `PROTO_BASE`, which the tool
-packages need:
+The workspace `.venv` installs the tool packages. `./init_workspace.sh --init`
+does this. Source the workspace environment and activate the environment to
+use the tools:
 
 ```bash
 source workspace-env.sh
-```
-
-Then create and activate the tools environment:
-
-```bash
-cd python
 source init_venv.sh
 ```
-
-This installs each tool package and puts its commands in the `PATH` of
-`python/.venv`.
 
 ### Generated protobuf bindings
 
 Some tool packages do not contain their Python protobuf bindings. They
 generate the bindings at install time, and `PROTO_BASE` gives the location of
 the `.proto` files. Thus you must source the workspace environment before you
-create the tools environment.
+install the packages.
 
-To generate the bindings again, run `python/rebuild_venv.sh`. A plain
-`uv sync` does not generate them again.
+A plain `uv sync` does not generate the bindings again. To generate them again
+in the workspace `.venv`, reinstall the packages with `PROTO_BASE` set:
+
+```bash
+source workspace-env.sh
+uv sync --all-groups --reinstall
+```
+
+`python/rebuild_venv.sh` does the same for `python/.venv`.
 
 Refer to `python/README.md` for the tool list and for more information. That
 repository also operates alone, without this workspace.
