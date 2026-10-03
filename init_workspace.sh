@@ -40,11 +40,24 @@ ask() {
 }
 
 function init_venv {
+    # The python packages build their protobuf bindings and need PROTO_BASE.
+    source "$SCRIPTPATH/workspace-env.sh" >/dev/null
     source init_venv.sh
     if [ ! $? -eq 0 ]; then
         echo "Exiting after error."
         return 1
     fi
+}
+
+# The full venv needs python/ (a path dependency), and west clones python/.
+# Install only west first, so west can clone the repos. init_venv then syncs
+# everything.
+function bootstrap_west {
+    if [ ! -d "$SCRIPTPATH/.venv" ]; then
+        uv venv --python ">=3.10" || { echo "Error creating virtual env."; return 1; }
+    fi
+    uv pip install --python "$SCRIPTPATH/.venv/bin/python" "west>=0.14.0" || return 1
+    source "$SCRIPTPATH/.venv/bin/activate"
 }
 
 function west_steps {
@@ -59,7 +72,10 @@ function west_steps {
     echo "Running west zephyr-export"
     west zephyr-export || {
         echo "Error: 'west zephyr-export' failed. Stopping."; return 1; }
+}
 
+# Needs the full venv (requests), so run it after init_venv.
+function fetch_blobs {
     echo "Fetching esp32 blobs."
     west blobs fetch hal_espressif || {
         echo "Error: 'west blobs fetch' failed. Stopping."; return 1; }
@@ -201,7 +217,7 @@ fi
 if [[ $do_init == 1 ]]; then
     ask "Do you really want to init the workspace?"
     if [[ $? == 1 ]]; then
-        init_venv && west_steps
+        bootstrap_west && west_steps && init_venv && fetch_blobs
     fi
 fi
 
